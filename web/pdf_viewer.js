@@ -1940,6 +1940,7 @@
       var viewport = this.viewport;
       var div = this.div;
       var canvasWrapper = document.createElement('div');
+      canvasWrapper.style.display = 'none';
       canvasWrapper.style.width = div.style.width;
       canvasWrapper.style.height = div.style.height;
       canvasWrapper.classList.add('canvasWrapper');
@@ -2125,9 +2126,11 @@
        }
       };
       renderTask.promise.then(function pdfPageRenderCallback() {
+       canvasWrapper.style.display = 'block';
        showCanvas();
        resolveRenderPromise(undefined);
       }, function pdfPageRenderError(error) {
+       canvasWrapper.style.display = 'block';
        showCanvas();
        rejectRenderPromise(error);
       });
