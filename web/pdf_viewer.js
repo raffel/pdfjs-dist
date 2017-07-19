@@ -2130,7 +2130,6 @@
        showCanvas();
        resolveRenderPromise(undefined);
       }, function pdfPageRenderError(error) {
-       canvasWrapper.style.display = 'block';
        showCanvas();
        rejectRenderPromise(error);
       });
