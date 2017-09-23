@@ -1708,7 +1708,7 @@
    var roundToDivide = uiUtils.roundToDivide;
    var RendererType = uiUtils.RendererType;
    var RenderingStates = pdfRenderingQueue.RenderingStates;
-   var TEXT_LAYER_RENDER_DELAY = 200;
+   var TEXT_LAYER_RENDER_DELAY = 0;
    var PDFPageView = function PDFPageViewClosure() {
     function PDFPageView(options) {
      var container = options.container;
