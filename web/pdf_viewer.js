@@ -383,14 +383,12 @@
     var currentHeight, viewHeight, hiddenHeight, percentHeight;
     var currentWidth, viewWidth;
     var firstVisibleElementInd = views.length === 0 ? 0 : binarySearchFirstItem(views, isElementBottomBelowViewTop);
+    firstVisibleElementInd = Math.max(0, firstVisibleElementInd - 1);
     for (var i = firstVisibleElementInd, ii = views.length; i < ii; i++) {
      view = views[i];
      element = view.div;
      currentHeight = element.offsetTop + element.clientTop;
      viewHeight = element.clientHeight;
-     if (currentHeight > bottom) {
-      break;
-     }
      currentWidth = element.offsetLeft + element.clientLeft;
      viewWidth = element.clientWidth;
      if (currentWidth + viewWidth < left || currentWidth > right) {
@@ -405,6 +403,9 @@
       view: view,
       percent: percentHeight
      });
+     if (currentHeight > bottom) {
+      break;
+     }
     }
     var first = visible[0];
     var last = visible[visible.length - 1];
