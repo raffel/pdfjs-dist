@@ -1779,6 +1779,14 @@
       var currentAnnotationNode = keepAnnotations && this.annotationLayer && this.annotationLayer.div || null;
       for (var i = childNodes.length - 1; i >= 0; i--) {
        var node = childNodes[i];
+       if (node.classList.contains('textLayer')) {
+        var textLayerViewport = this.textLayer.viewport;
+        var scale = Math.floor(this.viewport.width) / textLayerViewport.width;
+        var CustomStyle = pdfjsLib.CustomStyle;
+        CustomStyle.setProp('transform', node, 'scale(' + scale + ', ' + scale + ')');
+        CustomStyle.setProp('transformOrigin', node, '0% 0%');
+        continue;
+       }
        if (currentZoomLayerNode === node || currentAnnotationNode === node) {
         continue;
        }
@@ -1803,6 +1811,28 @@
       this.loadingIconDiv = document.createElement('div');
       this.loadingIconDiv.className = 'loadingIcon';
       div.appendChild(this.loadingIconDiv);
+
+      if (!this.pdfPage) return;
+
+      var textLayerDiv = null;
+      var textLayer = null;
+      if (this.textLayerFactory && !this.textLayer) {
+       textLayerDiv = document.createElement('div');
+       textLayerDiv.className = 'textLayer';
+       textLayerDiv.style.width = div.style.width;
+       textLayerDiv.style.height = div.style.height;
+       if (this.annotationLayer && this.annotationLayer.div) {
+        div.insertBefore(textLayerDiv, this.annotationLayer.div);
+       } else {
+        div.appendChild(textLayerDiv);
+       }
+       textLayer = this.textLayerFactory.createTextLayerBuilder(textLayerDiv, this.id - 1, this.viewport, this.enhanceTextSelection);
+        this.textLayer = textLayer;
+        this.pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
+         textLayer.setTextContent(textContent);
+         textLayer.render(TEXT_LAYER_RENDER_DELAY);
+        });
+      }
      },
      update: function PDFPageView_update(scale, rotation) {
       this.scale = scale || this.scale;
@@ -1859,7 +1889,7 @@
       this.resume = null;
       if (this.textLayer) {
        this.textLayer.cancel();
-       this.textLayer = null;
+      //  this.textLayer = null;
       }
      },
      updatePosition: function PDFPageView_updatePosition() {
@@ -1949,21 +1979,6 @@
       } else {
        div.appendChild(canvasWrapper);
       }
-      var textLayerDiv = null;
-      var textLayer = null;
-      if (this.textLayerFactory) {
-       textLayerDiv = document.createElement('div');
-       textLayerDiv.className = 'textLayer';
-       textLayerDiv.style.width = canvasWrapper.style.width;
-       textLayerDiv.style.height = canvasWrapper.style.height;
-       if (this.annotationLayer && this.annotationLayer.div) {
-        div.insertBefore(textLayerDiv, this.annotationLayer.div);
-       } else {
-        div.appendChild(textLayerDiv);
-       }
-       textLayer = this.textLayerFactory.createTextLayerBuilder(textLayerDiv, this.id - 1, this.viewport, this.enhanceTextSelection);
-      }
-      this.textLayer = textLayer;
       var renderContinueCallback = null;
       if (this.renderingQueue) {
        renderContinueCallback = function renderContinueCallback(cont) {
