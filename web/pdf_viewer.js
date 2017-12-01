@@ -1780,6 +1780,12 @@
       for (var i = childNodes.length - 1; i >= 0; i--) {
        var node = childNodes[i];
        if (node.classList.contains('textLayer')) {
+        this.eventBus.dispatch('textlayerrendered', {
+         source: {
+           textLayerDiv: node
+         },
+         pageNumber: this.id
+        });
         var textLayerViewport = this.textLayer.viewport;
         var scale = Math.floor(this.viewport.width) / textLayerViewport.width;
         var CustomStyle = pdfjsLib.CustomStyle;
@@ -1878,6 +1884,11 @@
       if (this.zoomLayer) {
        this.cssTransform(this.zoomLayer.firstChild);
       }
+      this.eventBus.dispatch('pagerendered', {
+       source: this,
+       pageNumber: this.id,
+       cssTransform: true
+      });
       this.reset(true, true);
      },
      cancelRendering: function PDFPageView_cancelRendering() {
