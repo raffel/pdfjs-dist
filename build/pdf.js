@@ -4400,6 +4400,7 @@
     function isAllWhitespace(str) {
      return !NonWhitespaceRegexp.test(str);
     }
+    var textId = 1;
     var styleBuf = [
      'left: ',
      0,
@@ -4413,6 +4414,7 @@
     ];
     function appendText(task, geom, styles) {
      var textDiv = document.createElement('div');
+     textDiv.setAttribute('data-text-id', textId++);
      var textDivProperties = {
       style: null,
       angle: 0,
