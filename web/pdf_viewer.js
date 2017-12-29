@@ -2733,6 +2733,9 @@
        this.update();
       }
      },
+     destroy: function () {
+       this.container.removeEventListener('scroll', this.scroll._eventHandler, true);
+     },
      setDocument: function (pdfDocument) {
       if (this.pdfDocument) {
        this._cancelRendering();
