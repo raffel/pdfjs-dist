@@ -3954,12 +3954,14 @@
      _bindLink: function LinkAnnotationElement_bindLink(link, destination) {
       var self = this;
       link.href = this.linkService.getDestinationHash(destination);
-      link.onclick = function () {
-       if (destination) {
-        self.linkService.navigateTo(destination);
-       }
-       return false;
-      };
+      // FIXME onclick needs to be removed when destroying PDFViewer
+      // TODO see https://stackoverflow.com/questions/1687790/how-to-remove-onclick-with-jquery
+      // link.onclick = function () {
+      //  if (destination) {
+      //   self.linkService.navigateTo(destination);
+      //  }
+      //  return false;
+      // };
       if (destination) {
        link.className = 'internalLink';
       }
@@ -3967,10 +3969,12 @@
      _bindNamedAction: function LinkAnnotationElement_bindNamedAction(link, action) {
       var self = this;
       link.href = this.linkService.getAnchorUrl('');
-      link.onclick = function () {
-       self.linkService.executeNamedAction(action);
-       return false;
-      };
+      // FIXME onclick needs to be removed when destroying PDFViewer
+      // TODO see https://stackoverflow.com/questions/1687790/how-to-remove-onclick-with-jquery
+      // link.onclick = function () {
+      //  self.linkService.executeNamedAction(action);
+      //  return false;
+      // };
       link.className = 'internalLink';
      }
     });
