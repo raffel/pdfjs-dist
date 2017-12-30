@@ -2417,11 +2417,16 @@
       this.matches = this.convertMatches(pageMatches, pageMatchesLength);
       this.renderMatches(this.matches);
      },
+     _unbindMouse: function TextLayerBuilder_unbindMouse() {
+      var div = this.textLayerDiv;
+      div.removeEventListener('mousedown', this.onMouseDown);
+      div.removeEventListener('mouseup', this.onMouseUp);
+     },
      _bindMouse: function TextLayerBuilder_bindMouse() {
       var div = this.textLayerDiv;
       var self = this;
       var expandDivsTimer = null;
-      div.addEventListener('mousedown', function (e) {
+      this.onMouseDown = function (e) {
        if (self.enhanceTextSelection && self.textLayerRenderTask) {
         self.textLayerRenderTask.expandTextDivs(true);
         if (expandDivsTimer) {
@@ -2442,8 +2447,8 @@
         end.style.top = (r * 100).toFixed(2) + '%';
        }
        end.classList.add('active');
-      });
-      div.addEventListener('mouseup', function (e) {
+      }
+      this.onMouseUp = function (e) {
        if (self.enhanceTextSelection && self.textLayerRenderTask) {
         expandDivsTimer = setTimeout(function () {
          if (self.textLayerRenderTask) {
@@ -2459,7 +2464,9 @@
        }
        end.style.top = '';
        end.classList.remove('active');
-      });
+      }
+      div.addEventListener('mousedown', this.onMouseDown);
+      div.addEventListener('mouseup', this.onMouseUp);
      }
     };
     return TextLayerBuilder;
@@ -2732,9 +2739,6 @@
       if (this.defaultRenderingQueue) {
        this.update();
       }
-     },
-     destroy: function () {
-       this.container.removeEventListener('scroll', this.scroll._eventHandler, true);
      },
      setDocument: function (pdfDocument) {
       if (this.pdfDocument) {
@@ -3150,8 +3154,11 @@
       for (var i = 0, ii = this._pages.length; i < ii; i++) {
        if (this._pages[i] && this._pages[i].renderingState !== RenderingStates.FINISHED) {
         this._pages[i].reset();
+       } else {
+        this._pages[i].textLayer._unbindMouse();
        }
       }
+      this.container.removeEventListener('scroll', this.scroll._eventHandler, true);
      },
      _cancelRendering: function PDFViewer_cancelRendering() {
       for (var i = 0, ii = this._pages.length; i < ii; i++) {
