@@ -2834,6 +2834,8 @@
        if (this.findController) {
         this.findController.resolveFirstPage();
        }
+       isOnePageRenderedResolved = true;
+       resolveOnePageRendered();
       }.bind(this));
      },
      setPageLabels: function PDFViewer_setPageLabels(labels) {
