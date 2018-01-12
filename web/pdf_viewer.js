@@ -2799,7 +2799,7 @@
          defaultViewport: viewport.clone(),
          renderingQueue: this.renderingQueue,
          textLayerFactory: textLayerFactory,
-         annotationLayerFactory: null,
+         annotationLayerFactory: this,
          enhanceTextSelection: this.enhanceTextSelection,
          renderInteractiveForms: this.renderInteractiveForms,
          renderer: this.renderer
