@@ -2752,35 +2752,7 @@
       }
       var pagesCount = pdfDocument.numPages;
       var self = this;
-      var resolvePagesPromise;
-      var pagesPromise = new Promise(function (resolve) {
-       resolvePagesPromise = resolve;
-      });
-      this.pagesPromise = pagesPromise;
-      pagesPromise.then(function () {
-       self._pageViewsReady = true;
-       self.eventBus.dispatch('pagesloaded', {
-        source: self,
-        pagesCount: pagesCount
-       });
-      });
-      var isOnePageRenderedResolved = false;
-      var resolveOnePageRendered = null;
-      var onePageRendered = new Promise(function (resolve) {
-       resolveOnePageRendered = resolve;
-      });
-      this.onePageRendered = onePageRendered;
-      var bindOnAfterAndBeforeDraw = function (pageView) {
-       pageView.onBeforeDraw = function pdfViewLoadOnBeforeDraw() {
-        self._buffer.push(this);
-       };
-       pageView.onAfterDraw = function pdfViewLoadOnAfterDraw() {
-        if (!isOnePageRenderedResolved) {
-         isOnePageRenderedResolved = true;
-         resolveOnePageRendered();
-        }
-       };
-      };
+      self._pageViewsReady = true;
       var firstPagePromise = pdfDocument.getPage(1);
       this.firstPagePromise = firstPagePromise;
       return firstPagePromise.then(function (pdfPage) {
@@ -2804,22 +2776,19 @@
          renderInteractiveForms: this.renderInteractiveForms,
          renderer: this.renderer
         });
-        bindOnAfterAndBeforeDraw(pageView);
         this._pages.push(pageView);
        }
        var linkService = this.linkService;
-       onePageRendered.then(function () {
-        for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
+       for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
+        var pageView = self._pages[pageNum - 1];
+        if (pageView.pdfPage) continue;
+        pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
          var pageView = self._pages[pageNum - 1];
-         if (pageView.pdfPage) continue;
-         pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
-          var pageView = self._pages[pageNum - 1];
-          pageView.setPdfPage(pdfPage);
-          linkService.cachePageRef(pageNum, pdfPage.ref);
-          pageView.draw();
-         }.bind(null, pageNum));
-        }
-       });
+         pageView.setPdfPage(pdfPage);
+         linkService.cachePageRef(pageNum, pdfPage.ref);
+         pageView.draw();
+        }.bind(null, pageNum));
+       }
        self.eventBus.dispatch('pagesinit', { source: self });
        if (this.defaultRenderingQueue) {
         this.update();
@@ -2827,8 +2796,6 @@
        if (this.findController) {
         this.findController.resolveFirstPage();
        }
-       isOnePageRenderedResolved = true;
-       resolveOnePageRendered();
       }.bind(this));
      },
      setPageLabels: function PDFViewer_setPageLabels(labels) {
