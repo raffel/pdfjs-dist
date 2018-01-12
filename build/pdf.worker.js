@@ -50040,14 +50040,7 @@
     return array.buffer;
    }
    var supportsMozChunked = function supportsMozChunkedClosure() {
-    try {
-     var x = new XMLHttpRequest();
-     x.open('GET', 'https://example.com');
-     x.responseType = 'moz-chunked-arraybuffer';
-     return x.responseType === 'moz-chunked-arraybuffer';
-    } catch (e) {
-     return false;
-    }
+    return false;
    }();
    NetworkManager.prototype = {
     requestRange: function NetworkManager_requestRange(begin, end, listeners) {
