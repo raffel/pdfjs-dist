@@ -2013,6 +2013,7 @@
         return Promise.resolve(undefined);
        }
        self.renderingState = RenderingStates.FINISHED;
+       self.loadingIconDiv = div.querySelector('.loadingIcon');
        if (self.loadingIconDiv) {
         div.removeChild(self.loadingIconDiv);
         delete self.loadingIconDiv;
@@ -2047,12 +2048,12 @@
       this.paintTask = paintTask;
       var resultPromise = paintTask.promise.then(function () {
        return finishPaintTask(null).then(function () {
-        if (textLayer) {
-         pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
-          textLayer.setTextContent(textContent);
-          textLayer.render(TEXT_LAYER_RENDER_DELAY);
-         });
-        }
+        // if (this.textLayer) {
+        //  pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
+        //   this.textLayer.setTextContent(textContent);
+        //   this.textLayer.render(TEXT_LAYER_RENDER_DELAY);
+        //  });
+        // }
        });
       }, function (reason) {
        return finishPaintTask(reason);
@@ -2798,7 +2799,7 @@
          defaultViewport: viewport.clone(),
          renderingQueue: this.renderingQueue,
          textLayerFactory: textLayerFactory,
-         annotationLayerFactory: this,
+         annotationLayerFactory: null,
          enhanceTextSelection: this.enhanceTextSelection,
          renderInteractiveForms: this.renderInteractiveForms,
          renderer: this.renderer
@@ -2808,23 +2809,15 @@
        }
        var linkService = this.linkService;
        onePageRendered.then(function () {
-        if (!pdfjsLib.PDFJS.disableAutoFetch) {
-         var getPagesLeft = pagesCount;
-         for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
-          pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
-           var pageView = self._pages[pageNum - 1];
-           if (!pageView.pdfPage) {
-            pageView.setPdfPage(pdfPage);
-           }
-           linkService.cachePageRef(pageNum, pdfPage.ref);
-           getPagesLeft--;
-           if (!getPagesLeft) {
-            resolvePagesPromise();
-           }
-          }.bind(null, pageNum));
-         }
-        } else {
-         resolvePagesPromise();
+        for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
+         var pageView = self._pages[pageNum - 1];
+         if (pageView.pdfPage) continue;
+         pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
+          var pageView = self._pages[pageNum - 1];
+          pageView.setPdfPage(pdfPage);
+          linkService.cachePageRef(pageNum, pdfPage.ref);
+          pageView.draw();
+         }.bind(null, pageNum));
         }
        });
        self.eventBus.dispatch('pagesinit', { source: self });
